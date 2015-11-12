@@ -31,11 +31,11 @@
 output_file = "sim.out"
 
 # Total number of cores in the simulation
-total_cores = 64 
+total_cores = 64
 
 # This defines the number of processes that will used to
 # perform the simulation
-num_processes = 2 
+num_processes = 1
 
 # These flags are used to disable certain sub-systems of the simulator
 enable_core_modeling = true
@@ -121,7 +121,7 @@ stack_size_per_core = 2097152
 # mapping between processes and hosts. 
 [process_map]
 process0 = "127.0.0.1"
-process1 = "rsg-vm0.stanford.edu"
+process1 = "127.0.0.1"
 process2 = "127.0.0.1"
 process3 = "127.0.0.1"
 process4 = "127.0.0.1"

@@ -34,6 +34,7 @@ def spawn_job(machine_list, command, working_dir, graphite_home):
             exec_command = "ssh -x %s \"%s\"" % (machine_list[i], spawn_slave_command)
    
             print "%s Starting process: %d: %s" % (pmaster(), i, exec_command)
+            print "sitting here in spawn_master?"
             graphite_procs[i] = subprocess.Popen(exec_command, shell=True, preexec_fn=os.setsid)
 
     return graphite_procs
@@ -168,7 +169,7 @@ def get_process_list(command, num_processes):
     found_process_map = False
     for line in config:
         if found_process_map == True:
-            hostname_match = re.match(r'\s*process%d\s*=\s*\"([A-Za-z0-9.]+)\"' % (curr_process_num), line)
+            hostname_match = re.match(r'\s*process%d\s*=\s*\"([A-Za-z0-9.\_\-]+)\"' % (curr_process_num), line)
             if hostname_match:
                 process_list.append(hostname_match.group(1))
                 curr_process_num = curr_process_num + 1

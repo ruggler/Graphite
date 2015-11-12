@@ -36,10 +36,13 @@ BUILD_MODE ?=
 MODE ?= pin
 
 # What configuration file to use when running Graphite?
-CONFIG_FILE ?= carbon_sim.cfg
+C ?= carbon_sim.cfg
+CONFIG_FILE ?= ${C}
 # Which output dir to put the results in?
 # The default output dir corresponds to the date and time when the simulation was started
-OUTPUT_DIR ?= $(shell date +%Y-%m-%d_%H-%M-%S)
+
+O ?= $(shell date +%Y-%m-%d_%H-%M-%S)
+OUTPUT_DIR ?= $(O)
 
 # The following variables can be used to override the default parameters in the configuration file.
 # They can be set from individual test Makefiles or from the command line
