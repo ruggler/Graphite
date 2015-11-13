@@ -68,6 +68,7 @@ parser = OptionParser()
 parser.add_option("--results-dir", dest="results_dir", help="Graphite Results Directory")
 #parser.add_option("--num-cores", dest="num_cores", type="int", help="Number of Cores")
 (options,args) = parser.parse_args()
+options.results_dir = 'results/%s' % options.results_dir
 
 # Read Results Files
 try:
@@ -93,13 +94,12 @@ for line in cfg_text:
 
 # See if this was a power sim
 for line in cfg_text:
-   if (line.find("enable_power_modeling = true")):
+   if (line.find("enable_power_modeling = true")>-1):
       pwr_model = True
       break
-   elif (line.find("enable_power_modeling = false")):
+   
       pwr_model = False
       break
-
 
 # Total Instructions
 target_instructions = sum(rowSearch1("Core Summary", "Total Instructions"))
@@ -130,6 +130,7 @@ host_shutdown_time = getTime("Shutdown Time \(in microseconds\)") - getTime("Sto
 # Write event counters to a file
 stats_file = open("%s/stats.out" % (options.results_dir), 'w')
 
+stats_file.write("Num-Cores = %i\n" % (num_cores))
 stats_file.write("Target-Instructions = %e\n" % (target_instructions))
 stats_file.write("Target-Time = %f\n" % (target_time/1000000000))
 stats_file.write("Target-Energy = %s\n" % (target_energy))
