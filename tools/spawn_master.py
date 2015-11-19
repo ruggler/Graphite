@@ -34,7 +34,6 @@ def spawn_job(machine_list, command, working_dir, graphite_home):
             exec_command = "ssh -x %s \"%s\"" % (machine_list[i], spawn_slave_command)
    
             print "%s Starting process: %d: %s" % (pmaster(), i, exec_command)
-            print "sitting here in spawn_master?"
             graphite_procs[i] = subprocess.Popen(exec_command, shell=True, preexec_fn=os.setsid)
 
     return graphite_procs
