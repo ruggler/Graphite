@@ -2,7 +2,12 @@
 #include <stdlib.h>
 #include <pthread.h>
 
-#define ITERS		300
+#define ITERS		1000
+#define OUTPUT		0	
+#define LEFT_BOUND	-1.5
+#define RIGHT_BOUND     1	
+#define TOP_BOUND	1.1
+#define BOTTOM_BOUND	-1.1
 
 /* This program computes which iteration a given point fails the Mandelbrot set, if any.  We 
    define an NxM matrix as follows:
@@ -27,11 +32,11 @@
 void *mandelbrot( void *ptr );
 
 struct thread_data{
-     int pt_num;
+     long pt_num;
      float row;
      float col;
      int fail;
-     int pts_to_do;
+     long pts_to_do;
 };
 
 
@@ -39,31 +44,34 @@ int main(int argc, char *argv[])
 {
      // Parse input
      if (argc != 4){
-	printf("ERROR: Input args must be '<rows> <cols> <maxthreads>'\n");
+	printf("ERROR: Input args must be '<rows> <cols> <threads>'\nIf running in graphite, add AF=\"<rows> <cols> <threads>\"=n");
      	return(0);
      }
      int GRID_ROWS = atoi(argv[1]);
      int GRID_COLS = atoi(argv[2]);
      int num_threads = atoi(argv[3]);
      
-     int num_pts = GRID_ROWS * GRID_COLS;
+     long num_pts = GRID_ROWS * GRID_COLS;
+     
      pthread_t thread[num_pts];
      int ret;
-     int td_start_pt;
-     int i,j,pt_num;
+     long td_start_pt, pt_num;
+     int i,j;
      struct thread_data td[num_pts];
      int image[GRID_ROWS][GRID_COLS];
+     float WIDTH = RIGHT_BOUND - LEFT_BOUND;
+     float HEIGHT = TOP_BOUND - BOTTOM_BOUND;
 
      // Figure out number of points each thread needs to work on, assume num_pts is divisible by num_threads
-     int pts_per_thread = num_pts / num_threads;     
+     long pts_per_thread = num_pts / num_threads;     
 
-     printf("Getting ready to spawn %d threads to compute %d points (%d points per thread)\n", num_threads, num_pts,pts_per_thread);
+     printf("Getting ready to spawn %d threads to compute %ld points (%ld points per thread)\n", num_threads, num_pts,pts_per_thread);
      // Set up points
      for( i=0; i < GRID_ROWS; i = i + 1){
 	for( j=0; j < GRID_COLS; j = j + 1){
 	   pt_num = GRID_COLS*i + j; /* Compute nth thread number */
-	   td[pt_num].row = 2 - (float(i) / GRID_ROWS)*4;
-	   td[pt_num].col = -2 + (float(j) / GRID_COLS)*4;
+	   td[pt_num].row = TOP_BOUND - (float(i) / GRID_ROWS)*HEIGHT;
+	   td[pt_num].col = LEFT_BOUND + (float(j) / GRID_COLS)*WIDTH;
 	   td[pt_num].pt_num = pt_num;
 	   td[pt_num].pts_to_do = pts_per_thread;
 	}
@@ -95,20 +103,29 @@ int main(int argc, char *argv[])
      }
 
      // Show image
-     for( i=0; i < GRID_ROWS; i = i + 1){
-	for( j=0; j < GRID_COLS; j = j + 1){
-	   if (image[i][j] > ITERS-1){
-		printf("o");
+     if (OUTPUT==1){
+     	for( i=0; i < GRID_ROWS; i = i + 1){
+	   for( j=0; j < GRID_COLS; j = j + 1){
+	      if (image[i][j] > ITERS-1){
+		   printf("o");
+	      }
+	      else if (image[i][j] > 5){
+		   printf("-");
+	      }
+	      else{
+		   printf(" ");
+	      }
 	   }
-	   else if (image[i][j] > 5){
-		printf("-");
-	   }
-	   else{
-		printf(" ");
-	   }
+	   printf("\n");
 	}
-	printf("\n");
-     }	   
+     }	
+     else{
+	printf("Display image: off\n");
+     }   
+
+     // Write image to TGA
+     //uint16 header[9] = {0, 3, 0, 0, 0, 0, NUM_COLS, NUM_ROWS, 8};
+     //fwrite(
 
      exit(EXIT_SUCCESS);
 }
@@ -124,7 +141,7 @@ void *mandelbrot( void *ptr )
 
      coords = (struct thread_data *) ptr;
 
-     int pts_to_do = coords->pts_to_do;
+     long pts_to_do = coords->pts_to_do;
      for (k = 0; k < pts_to_do ; k = k+1){
 
         /* Set c */

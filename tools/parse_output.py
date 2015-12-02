@@ -93,12 +93,10 @@ for line in cfg_text:
 #      num_cores = line[ line.find("CORES=") + 6 : line.find("CORES=") + 10]
 
 # See if this was a power sim
+pwr_model = False
 for line in cfg_text:
    if (line.find("enable_power_modeling = true")>-1):
       pwr_model = True
-      break
-   
-      pwr_model = False
       break
 
 # Total Instructions
@@ -108,32 +106,36 @@ target_instructions = sum(rowSearch1("Core Summary", "Total Instructions"))
 target_time = max(rowSearch1("Core Summary", "Completion Time \(in nanoseconds\)"))
 
 
-# Energy - In joules
-if (pwr_model == True):
-   core_energy = "%f" % sum(rowSearch2("Tile Energy Monitor Summary", "Core", "Total Energy \(in J\)"))
-   cache_hierarchy_energy = "%f" % sum(rowSearch2("Tile Energy Monitor Summary", "Cache Hierarchy \(L1-I, L1-D, L2\)", "Total Energy \(in J\)"))
-   networks_energy = "%f" % sum(rowSearch2("Tile Energy Monitor Summary", "Networks \(User, Memory\)", "Total Energy \(in J\)"))
-   target_energy = "%f" % (float(core_energy) + float(cache_hierarchy_energy) + float(networks_energy))
-else:
-   print "No energy data found."
-   core_energy = "N/A";
-   cache_hierarchy_energy = "N/A";
-   networks_energy = "N/A";
-   target_energy = "N/A";
-
 # Host Time
 host_time = getTime("Shutdown Time \(in microseconds\)")
 host_initialization_time = getTime("Start Time \(in microseconds\)")
 host_working_time = getTime("Stop Time \(in microseconds\)") - getTime("Start Time \(in microseconds\)")
 host_shutdown_time = getTime("Shutdown Time \(in microseconds\)") - getTime("Stop Time \(in microseconds\)")
 
+# Energy - In joules
+if (pwr_model == True):
+   core_energy = "%f" % sum(rowSearch2("Tile Energy Monitor Summary", "Core", "Total Energy \(in J\)"))
+   cache_hierarchy_energy = "%f" % sum(rowSearch2("Tile Energy Monitor Summary", "Cache Hierarchy \(L1-I, L1-D, L2\)", "Total Energy \(in J\)"))
+   networks_energy = "%f" % sum(rowSearch2("Tile Energy Monitor Summary", "Networks \(User, Memory\)", "Total Energy \(in J\)"))
+   target_energy = "%f" % (float(core_energy) + float(cache_hierarchy_energy) + float(networks_energy))
+   edp = float(host_time) * (float(target_energy)) / 1000000
+   edp = "%f" % edp
+else:
+   print "No energy data found."
+   core_energy = "N/A";
+   cache_hierarchy_energy = "N/A";
+   networks_energy = "N/A";
+   target_energy = "N/A";
+   edp = "N/A";
+
 # Write event counters to a file
 stats_file = open("%s/stats.out" % (options.results_dir), 'w')
 
 stats_file.write("Num-Cores = %i\n" % (num_cores))
+stats_file.write("EDP (us*J) = %s\n" % edp)
 stats_file.write("Target-Instructions = %e\n" % (target_instructions))
-stats_file.write("Target-Time = %f\n" % (target_time/1000000000))
-stats_file.write("Target-Energy = %s\n" % (target_energy))
+stats_file.write("Target-Time (ns) = %f\n" % (target_time/1000000000))
+stats_file.write("Target-Energy (J)= %s\n" % (target_energy))
 stats_file.write("Target-Core-Energy = %s\n" % (core_energy))
 stats_file.write("Target-Cache-Hierarchy-Energy = %s\n" % (cache_hierarchy_energy))
 stats_file.write("Target-Networks-Energy = %s\n" % (networks_energy))
