@@ -1,0 +1,5 @@
+APP_NAME="mandelbrot"
+APP="${APP_NAME}_app_test"
+APP_FLAGS="64 64"
+tag="_run1"
+cores=(2 4 8 16 24 32 48 64)

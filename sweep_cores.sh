@@ -1,15 +1,7 @@
 #!/bin/bash
 
-# Specify app to run
-APP_NAME="mandelbrot"
-APP="${APP_NAME}_app_test"
-APP_FLAGS="64 64"
-
-# Tag to stick at the end of all results files in this sweep
-tag="_beastmode"
-
-# Specify number of cores to have in each simulation
-cores=(2 4 8 16 24 32 48 64) 
+# Load vars that are shared between sweep and parse: APP_NAME, APP, APP_FLAGS, tag, cores
+. ./script_config
 
 # Specify available machines
 MACHINES=( 'rsg-vm0.stanford.edu' 'rsg-vm1.stanford.edu' 'rsg-vm2.stanford.edu' 'rsg-vm3.stanford.edu' )
@@ -73,7 +65,7 @@ while [ ${#cores[@]} -gt 0 ]; do
 		sleep 4
 	
 	else
-		echo "PID ${this_pid} still running (${MACHINES[${machine_num}]})"
+		echo "Tried to run ${cores[${iter_num}]}-core sim on ${MACHINES[${machine_num}]}, but PID ${this_pid} of previous sim is still running there."
 		sleep 10
 	fi
 

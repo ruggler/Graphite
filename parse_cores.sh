@@ -1,13 +1,9 @@
 #!/bin/bash
 
-# Specify app to run
-APP_NAME="mandelbrot"
-APP="${APP_NAME}_app_test"
-tag="_test"
+# Load vars that are shared by sweep and parse: APP_NAME, APP, tag, cores
+. ./script_config
 
-# Specify number of cores to have in each simulation
-cores=(2 4 8 16 32 48 64)
-# Count number of simulations to de
+# Count number of simulations to do
 num_sims=${#cores[@]}
 
 for (( i=0;i<$num_sims;i++)); do
