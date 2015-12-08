@@ -1,5 +1,10 @@
-APP_NAME="mandelbrot"
+APP_NAME="compute_MT1"
 APP="${APP_NAME}_app_test"
-APP_FLAGS="64 64"
-tag="_run1"
-cores=(2 4 8 16 24 32 48 64)
+APP_FLAGS=""
+tag="_freqtest"
+cores=(2 64)
+freqs=(0.2 0.4 0.6 0.8 1 1.2 1.4 1.6 1.8 2)
+
+MACHINES=( 'rsg-vm0.stanford.edu' 'rsg-vm1.stanford.edu' 'rsg-vm2.stanford.edu' 'rsg-vm3.stanford.edu' 'rsg-vm4.stanford.edu' 'rsg-vm5.stanford.edu' 'rsg-vm6.stanford.edu' 'rsg-vm7.stanford.edu' )
+num_machines=${#MACHINES[@]}
+

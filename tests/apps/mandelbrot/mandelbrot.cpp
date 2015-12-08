@@ -102,6 +102,9 @@ int main(int argc, char *argv[])
 	}
      }
 
+     // Print message	
+     printf("Finished %i x %i image on %i threads.\n",GRID_ROWS,GRID_COLS,num_threads);
+
      // Show image
      if (OUTPUT==1){
      	for( i=0; i < GRID_ROWS; i = i + 1){
