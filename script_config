@@ -1,9 +1,11 @@
 APP_NAME="compute_MT1"
 APP="${APP_NAME}_app_test"
 APP_FLAGS=""
-tag="_freqtest"
-cores=(2 64)
-freqs=(0.2 0.4 0.6 0.8 1 1.2 1.4 1.6 1.8 2)
+tag="_data2"
+cores=(2 4 8 16 64)
+freqs=(0.4 0.8 1.0 1.4 1.6 1.8 2.0)
+# Write the job pairs (<core> <freq>) exactly as shown above (for string comparison) to exempt them
+exempt=(16 1.4 16 2.0 16 1.6 16 1.8 64 0.8 64 1.0 64 0.4 64 1.6 64 1.8 8 0.4 8 0.8 8 1.0 8 1.4 8 2.0 4 0.4 4 0.8 4 1.4 4 1.8 2 0.4 2 1.0 2 1.4 2 1.8 2 2.0 32 1.0)
 
 MACHINES=( 'rsg-vm0.stanford.edu' 'rsg-vm1.stanford.edu' 'rsg-vm2.stanford.edu' 'rsg-vm3.stanford.edu' 'rsg-vm4.stanford.edu' 'rsg-vm5.stanford.edu' 'rsg-vm6.stanford.edu' 'rsg-vm7.stanford.edu' )
 num_machines=${#MACHINES[@]}

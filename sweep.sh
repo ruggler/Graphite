@@ -23,9 +23,40 @@ do
 	done
 done	
 
+# Remove "exempt" jobs
+for (( i=0; i<${#exempt[@]}/2; i++ ))
+do
+	field1=${exempt[2*i]}
+	field2=${exempt[2*i+1]}
+	found=0
+	for (( j=0; j<${#jobs[@]}/2; j++ ))
+	do
+		if [[ ${jobs[2*j]} = $field1 && ${jobs[2*j+1]} = $field2 ]];
+		then
+			unset jobs[2*j]
+			unset jobs[2*j+1]
+			jobs=( "${jobs[@]}" )
+			found=1
+		fi
+	done
+	if [[ $found -eq 1 ]];
+	then
+		echo "Removed ${field1} ${field2} from jobs list"
+	else
+		echo "Could not find ${field1} ${field2} in jobs list"
+	fi
+done
+
 # Initialize counters
 machine_num=-1
 iter_num=-1
+
+# Initialize core diagnostics
+machine_stats=()
+for (( i=0; i<$num_machines; i++ ))
+do
+	machine_stats+=(-1)
+done
 
 while [ ${#jobs[@]} -gt 0 ]; do
 	# Inc counter and wrap
@@ -58,10 +89,14 @@ while [ ${#jobs[@]} -gt 0 ]; do
 		source ./read_cfg.sh
 
 		# Run command and plug the pid into the pids array for future monitoring
-		CMD="make ${APP} AF=\"${APP_FLAGS} ${mandel_threads}\" O=\"${output_dir}\" &"
+		CMD="make ${APP} AF=\"${APP_FLAGS} ${num_threads}\" O=\"${output_dir}\" &"
 		eval $CMD
 		pids[$machine_num]=$!	
 	
+		# Update machine stats
+		let "new_stat = ${machine_stats[${machine_num}]} + 1"
+		machine_stats[${machine_num}]=$new_stat
+		
 		# Remove this job from list and reindex
 		unset jobs[${index}]
 		unset jobs[${index_plus_one}]
@@ -70,8 +105,8 @@ while [ ${#jobs[@]} -gt 0 ]; do
 		sleep 4
 	
 	else
-		echo "Tried to run ${this_core}-core, ${this_freq}-GHz sim on ${this_machine}, but PID ${this_pid} of previous sim is still running there."
-		sleep 10
+		echo "Tried to run ${this_core}-core, ${this_freq}-GHz sim on ${this_machine}, but blocked by PID ${this_pid}. Machine stats: ${machine_stats[@]}" | tee -a log
+		sleep 12
 	fi
 
 		

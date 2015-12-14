@@ -3,7 +3,7 @@
 #include <pthread.h>
 
 #define ITERS		1000
-#define OUTPUT		0	
+#define OUTPUT		1	
 #define LEFT_BOUND	-1.5
 #define RIGHT_BOUND     1	
 #define TOP_BOUND	1.1

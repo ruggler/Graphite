@@ -5,7 +5,7 @@ parsed_cores=`cat carbon_sim.cfg | grep "total_cores = " | awk -F"= " '{print $2
 # Count freq
 parsed_freq=`cat carbon_sim.cfg | grep "domains = " | awk -F "<" '{print $2}' | awk -F "," '{print $1}'`
 
-# Make threads equal to cores minus one (for mandelbrot)
+# Make threads equal to cores minus one (for mandelbrot and compute_MT1)
 let "num_threads = ${parsed_cores} - 1"
 
 ## Set output dir
