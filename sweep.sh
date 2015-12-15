@@ -10,18 +10,34 @@ sed -i '/num_processes =/c\num_processes = 1' carbon_sim.cfg
 echo "Killing apps that were running previously"
 CMD="pkill -9 -f ${APP_NAME}"
 eval $CMD
-sleep 3
+sleep 2
 
-# Zip up configurations by alternating [<core> <freq> ... ]
+# Zip up configurations by alternating [<core> <freq> ... ] or [<latency> <linesize> ... ]
 jobs=()
-for (( i=0; i<${#cores[@]}; i++ ))
-do
-	for (( j=0; j<${#freqs[@]}; j++ ))
+if [[ "$sweep_type" = "corefreq" ]];
+then
+	for (( i=0; i<${#cores[@]}; i++ ))
 	do
-		jobs+=(${cores[i]})
-		jobs+=(${freqs[j]})
+		for (( j=0; j<${#freqs[@]}; j++ ))
+		do
+			jobs+=(${cores[i]})
+			jobs+=(${freqs[j]})
+		done
 	done
-done	
+elif [[ "$sweep_type" = "l1dstress" ]];
+then			
+	for (( i=0; i<${#latencies[@]}; i++ ))
+	do
+		for (( j=0; j<${#linesizes[@]}; j++ ))
+		do
+			jobs+=(${latencies[i]})
+			jobs+=(${linesizes[j]})
+		done
+	done
+else
+        echo "ERROR: sweep_type not recognized"
+        exit
+fi
 
 # Remove "exempt" jobs
 for (( i=0; i<${#exempt[@]}/2; i++ ))
@@ -68,8 +84,8 @@ while [ ${#jobs[@]} -gt 0 ]; do
 	this_machine=${MACHINES[${machine_num}]}
 	let "index=${iter_num}*2"
 	let "index_plus_one=${index}+1"
-	this_core=${jobs[index]}
-	this_freq=${jobs[index_plus_one]}
+	this_par1=${jobs[index]}
+	this_par2=${jobs[index_plus_one]}
 
 	# Check if there is a sim running on this machine
 	this_pid=${pids[${machine_num}]}
@@ -85,7 +101,7 @@ while [ ${#jobs[@]} -gt 0 ]; do
 	if [[ -z "$pid_text" ]]
 	then
 		# Handle config file edits and parsing
-		./edit_cfg.sh ${this_core} ${this_freq} ${this_machine}	
+		./edit_cfg.sh ${this_par1} ${this_par2} ${this_machine} ${sweep_type}	
 		source ./read_cfg.sh
 
 		# Run command and plug the pid into the pids array for future monitoring
@@ -105,7 +121,8 @@ while [ ${#jobs[@]} -gt 0 ]; do
 		sleep 4
 	
 	else
-		echo "Tried to run ${this_core}-core, ${this_freq}-GHz sim on ${this_machine}, but blocked by PID ${this_pid}. Machine stats: ${machine_stats[@]}" | tee -a log
+		echo "Tried to run ${this_par1}, ${this_par2} sim on ${this_machine}, but blocked by PID ${this_pid}. Machine stats: ${machine_stats[@]}" | tee -a log
+		date | tee -a log
 		sleep 12
 	fi
 
